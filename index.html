@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信みっけ | 士業のための信頼可視化ツール</title>
+<meta name="description" content="事務所・スタッフ・業務風景写真から信頼訴求・相談誘導のSNS投稿文を自動生成。税理士・社労士・行政書士・中小企業診断士に。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:        #1a2a4a;
+  --navy-deep:   #0f1e38;
+  --navy-mid:    #243456;
+  --navy-light:  #2e4070;
+  --accent:      #c8a84b;
+  --accent-soft: #e8d08a;
+  --white:       #ffffff;
+  --off-white:   #f4f6fa;
+  --text:        #1a2a4a;
+  --text-soft:   #5a6a8a;
+  --border:      #d0d8e8;
+  --shadow:      0 4px 24px rgba(26,42,74,0.12);
+  --radius:      12px;
+}
+
+[data-theme="dark"] {
+  --white:     #1a2a4a;
+  --off-white: #162038;
+  --text:      #e8edf8;
+  --text-soft: #8a9ab8;
+  --border:    #2e4070;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--off-white);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===== HEADER ===== */
+.app-header {
+  background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy-mid) 60%, var(--navy-light) 100%);
+  color: var(--white);
+  padding: 60px 20px 24px; /* 右上にボタンが入るため上部余白を調整 */
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.app-header::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: rgba(200,168,75,0.12);
+}
+
+.app-header::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: -20px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(200,168,75,0.08);
+}
+
+.app-logo {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--white);
+  position: relative; z-index: 1;
+}
+
+.app-logo span {
+  color: var(--accent);
+}
+
+.app-tagline {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  color: rgba(255,255,255,0.65);
+  margin-top: 4px;
+  text-transform: uppercase;
+  position: relative; z-index: 1;
+}
+
+.app-subtitle {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.80);
+  margin-top: 10px;
+  line-height: 1.6;
+  position: relative; z-index: 1;
+}
+
+.free-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--navy-deep);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 20px;
+  margin-top: 12px;
+  position: relative; z-index: 1;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 16px 60px;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-top: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.card-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title::before {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* ===== PASSWORD GATE ===== */
+#password-gate {
+  text-align: center;
+  padding: 32px 20px;
+}
+
+#password-gate h2 {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 1.2rem;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+
+#password-gate p {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  margin-bottom: 20px;
+}
+
+.pw-input-wrap {
+  display: flex;
+  gap: 8px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.pw-input-wrap input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--off-white);
+  color: var(--text);
+}
+
+.pw-input-wrap input:focus {
+  border-color: var(--navy);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+  color: var(--white);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+
+.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+.pw-note {
+  font-size: 0.75rem;
+  color: var(--text-soft);
+  margin-top: 10px;
+}
+
+.pw-error {
+  color: #e03a3a;
+  font-size: 0.8rem;
+  margin-top: 8px;
+  display: none;
+}
+
+/* ===== MAIN APP ===== */
+#main-app { display: none; }
+
+/* ===== SETTINGS ===== */
+.settings-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.setting-group label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-soft);
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.theme-toggle {
+  display: flex;
+  gap: 6px;
+}
+
+.theme-btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--text-soft);
+  transition: all 0.2s;
+}
+
+.theme-btn.active {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: var(--white);
+}
+
+/* ===== SNS SETTINGS ===== */
+.sns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sns-item label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-soft);
+  margin-bottom: 4px;
+}
+
+.sns-item input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  background: var(--off-white);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.sns-item input:focus { border-color: var(--navy); }
+
+.btn-save {
+  background: var(--accent);
+  color: var(--navy-deep);
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: opacity 0.2s;
+}
+
+.btn-save:hover { opacity: 0.85; }
+
+/* ===== PHOTO UPLOAD ===== */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background: var(--off-white);
+}
+
+.upload-zone:hover {
+  border-color: var(--navy);
+  background: rgba(26,42,74,0.03);
+}
+
+.upload-icon { font-size: 2.4rem; margin-bottom: 8px; }
+
+.upload-text {
+  font-size: 0.88rem;
+  color: var(--text-soft);
+}
+
+.upload-hint {
+  font-size: 0.75rem;
+  color: var(--text-soft);
+  margin-top: 6px;
+  opacity: 0.7;
+}
+
+.upload-zone.has-image {
+  padding: 0;
+  border-style: solid;
+  border-color: var(--navy);
+}
+
+.preview-img {
+  width: 100%;
+  border-radius: 10px;
+  display: block;
+  max-height: 320px;
+  object-fit: cover;
+}
+
+.remove-btn {
+  display: block;
+  width: 100%;
+  padding: 7px;
+  background: rgba(224,58,58,0.08);
+  border: none;
+  color: #e03a3a;
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 0 0 10px 10px;
+  transition: background 0.2s;
+}
+
+.remove-btn:hover { background: rgba(224,58,58,0.15); }
+
+/* ===== TEXTAREA ===== */
+.hint-area {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 90px;
+  background: var(--off-white);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+  line-height: 1.7;
+}
+
+.hint-area:focus { border-color: var(--navy); }
+.hint-label {
+  font-size: 0.78rem;
+  color: var(--text-soft);
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+/* ===== SNS TYPE SELECT ===== */
+.sns-type-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.sns-type-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--text-soft);
+  transition: all 0.2s;
+}
+
+.sns-type-btn.active {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: var(--white);
+}
+
+/* ===== GENERATE BTN ===== */
+.btn-generate {
+  width: 100%;
+  background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy-light) 100%);
+  color: var(--white);
+  border: none;
+  padding: 15px;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  margin-top: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-generate:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-generate:active { transform: translateY(0); }
+
+.btn-generate::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  to { left: 150%; }
+}
+
+/* ===== LOADING ===== */
+.loading-wrap {
+  text-align: center;
+  padding: 32px;
+  display: none;
+}
+
+.loading-dots {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.loading-dots span {
+  width: 9px; height: 9px;
+  background: var(--navy);
+  border-radius: 50%;
+  animation: bounce 1.2s infinite;
+}
+
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-8px); opacity: 1; }
+}
+
+.loading-text {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  margin-top: 12px;
+}
+
+/* ===== RESULT ===== */
+.result-wrap {
+  display: none;
+}
+
+.result-section {
+  margin-bottom: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.result-label {
+  background: var(--navy);
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  letter-spacing: 0.1em;
+}
+
+.result-body {
+  padding: 14px;
+  font-size: 0.88rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  color: var(--text);
+  background: var(--off-white);
+}
+
+.result-actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+}
+
+.btn-copy {
+  padding: 6px 16px;
+  border: 1.5px solid var(--navy);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--navy);
+  font-size: 0.78rem;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-copy:hover {
+  background: var(--navy);
+  color: var(--white);
+}
+
+.btn-copy.copied {
+  background: #2a7a4a;
+  border-color: #2a7a4a;
+  color: var(--white);
+}
+
+/* ===== FOOTER NOTE ===== */
+.footer-note {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-soft);
+  margin-top: 28px;
+  line-height: 1.8;
+  padding: 0 10px;
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(15, 30, 56, 0.7);
+  z-index: 1000;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modal {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -48%);
+  background: var(--white);
+  width: 90%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: var(--radius);
+  z-index: 1001;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  display: none;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+
+.modal-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-soft);
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ヘッダーボタン用 */
+.header-actions {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.header-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--white);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.header-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* 使い方テキスト用 */
+.howto-purpose {
+  background: var(--off-white);
+  padding: 14px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.howto-purpose strong {
+  color: var(--accent);
+}
+
+.howto-steps {
+  list-style: none;
+  counter-reset: step-counter;
+}
+
+.howto-steps li {
+  position: relative;
+  padding-left: 36px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.howto-steps li::before {
+  counter-increment: step-counter;
+  content: counter(step-counter);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  background: var(--accent);
+  color: var(--navy-deep);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.howto-steps h4 {
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.howto-steps p {
+  color: var(--text-soft);
+  font-size: 0.82rem;
+}
+
+/* ===== DIVIDER ===== */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 18px 0;
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--navy);
+  color: var(--white);
+  padding: 10px 24px;
+  border-radius: 24px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 999;
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .app-logo { font-size: 1.8rem; }
+  .sns-grid { grid-template-columns: 1fr; }
+  .card { padding: 18px 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="header-actions">
+    <button class="header-btn" onclick="openModal('howto-modal')">❓ 使い方</button>
+    <button class="header-btn" onclick="openModal('settings-modal')">⚙️ 設定</button>
+  </div>
+  <div class="app-logo">信<span>みっけ</span></div>
+  <div class="app-tagline">TRUST FINDER FOR PROFESSIONALS</div>
+  <div class="app-subtitle">
+    事務所・スタッフ・業務風景写真から<br>
+    信頼訴求・相談誘導のSNS投稿文を自動生成
+  </div>
+  <div class="free-badge">🎁 リリース記念 2ヶ月間 無料モニター実施中</div>
+</div>
+
+<div class="container">
+
+  <!-- PASSWORD GATE (テスト中は非表示) -->
+  <!-- <div class="card" id="password-gate"> ... </div> -->
+
+  <!-- MAIN APP -->
+  <div id="main-app" style="display:block">
+
+    <!-- MAIN GENERATOR -->
+    <div class="card">
+      <div class="card-title">信頼の見える化 — 投稿文を生成する</div>
+
+      <!-- PHOTO UPLOAD -->
+      <div id="upload-zone" class="upload-zone" onclick="document.getElementById('photo-input').click()">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">写真をタップしてアップロード</div>
+        <div class="upload-hint">事務所・スタッフ・業務風景・表彰状など（任意）</div>
+      </div>
+      <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="loadPhoto(event)">
+
+      <div class="divider"></div>
+
+      <!-- SNS TYPE -->
+      <div style="margin-bottom:10px;">
+        <div style="font-size:0.78rem;color:var(--text-soft);margin-bottom:8px;font-weight:500;">投稿するSNSを選択（複数可）</div>
+        <div class="sns-type-wrap">
+          <button class="sns-type-btn active" data-sns="threads" onclick="toggleSNS(this)">Threads</button>
+          <button class="sns-type-btn" data-sns="instagram" onclick="toggleSNS(this)">Instagram</button>
+          <button class="sns-type-btn" data-sns="facebook" onclick="toggleSNS(this)">Facebook</button>
+          <button class="sns-type-btn" data-sns="line" onclick="toggleSNS(this)">公式LINE</button>
+        </div>
+      </div>
+
+      <!-- HINT TEXT -->
+      <div class="hint-label">
+        📝 ヒント・補足情報（写真がない場合はここに状況を入力してください）<br>
+        <span style="font-size:0.72rem;opacity:0.7;">例：「確定申告期終了後のスタッフ打ち上げ写真」「顧問先から感謝状をいただきました」「新人スタッフが初めて一人で記帳を終えた日」</span>
+      </div>
+      <textarea class="hint-area" id="hint-text" placeholder="ここに写真の説明や伝えたいことを入力してください（写真なしでも生成できます）"></textarea>
+
+      <button class="btn-generate" id="btn-generate" onclick="generate()">
+        ✨ 信頼の言葉を見つける
+      </button>
+    </div>
+
+    <!-- LOADING -->
+    <div class="card loading-wrap" id="loading">
+      <div class="loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="loading-text">信頼の言葉を探しています…</div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="result-area" class="result-wrap">
+      <div class="card">
+        <div class="card-title">生成された投稿文</div>
+        <div id="result-content"></div>
+        <div class="footer-note" style="margin-top:16px;">
+          💡 提案内容はアイデアの種として、あなたらしい言葉にアレンジしてご活用ください
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-app -->
+
+  <div class="footer-note">
+    信みっけ — 士業のための信頼可視化ツール<br>
+    © 2026 SPCウェブマネジメントサービス
+  </div>
+
+</div><!-- /container -->
+
+<!-- MODAL OVERLAY -->
+<div id="modal-overlay" class="modal-overlay" onclick="closeAllModals()"></div>
+
+<!-- HOW TO MODAL -->
+<div id="howto-modal" class="modal">
+  <div class="modal-header">
+    <div class="modal-title">❓ アプリの目的と使い方</div>
+    <button class="modal-close" onclick="closeModal('howto-modal')">&times;</button>
+  </div>
+  <div class="modal-body">
+    <div class="howto-purpose">
+      <strong>信みっけ</strong>は、士業（税理士・社労士・行政書士・中小企業診断士など）の皆様が、日々の業務風景やスタッフの写真から、SNSで<strong>「信頼感」</strong>や<strong>「親しみやすさ」</strong>を伝え、相談に繋げるための投稿文を簡単に作成できるツールです。
+    </div>
+    <ul class="howto-steps">
+      <li>
+        <h4>写真をアップロード（任意）</h4>
+        <p>事務所の様子、スタッフの笑顔、業務風景などの写真を選択します。写真がなくても生成可能です。</p>
+      </li>
+      <li>
+        <h4>投稿するSNSを選択</h4>
+        <p>Threads、Instagram、Facebook、公式LINEから投稿先を選びます（複数選択可）。</p>
+      </li>
+      <li>
+        <h4>ヒント・補足情報を入力</h4>
+        <p>「今日あったこと」や「写真の背景」など、伝えたいことを簡単に入力します。（例：確定申告が終わって一息ついているところです）</p>
+      </li>
+      <li>
+        <h4>「信頼の言葉を見つける」ボタンを押す</h4>
+        <p>AIがそれぞれのSNSの特性に合わせた魅力的な投稿文を自動で作成します。</p>
+      </li>
+      <li>
+        <h4>文章をコピーしてSNSに投稿</h4>
+        <p>作成された文章をコピーして、ご自身のSNSアカウントで投稿してください。ご自身の言葉で少しアレンジすると、より想いが伝わります。</p>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settings-modal" class="modal">
+  <div class="modal-header">
+    <div class="modal-title">⚙️ 設定</div>
+    <button class="modal-close" onclick="closeModal('settings-modal')">&times;</button>
+  </div>
+  <div class="modal-body">
+    
+    <div style="margin-bottom: 24px;">
+      <div style="font-weight:600; color:var(--text); margin-bottom:12px; font-size:0.9rem;">表示設定</div>
+      <div class="setting-group">
+        <label>テーマ</label>
+        <div class="theme-toggle">
+          <button class="theme-btn active" id="btn-light" onclick="setTheme('light')">☀️ ライト</button>
+          <button class="theme-btn" id="btn-dark" onclick="setTheme('dark')">🌙 ダーク</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div style="font-weight:600; color:var(--text); margin-bottom:8px; font-size:0.9rem;">SNSアカウント設定（任意）</div>
+      <p style="font-size:0.78rem;color:var(--text-soft);margin-bottom:14px;">
+        設定しておくと、生成される投稿文の末尾に自動でアカウント情報が追加されます
+      </p>
+      <div class="sns-grid">
+        <div class="sns-item">
+          <label>Threads ID</label>
+          <input type="text" id="sns-threads" placeholder="@example">
+        </div>
+        <div class="sns-item">
+          <label>Instagram ID</label>
+          <input type="text" id="sns-instagram" placeholder="@example">
+        </div>
+        <div class="sns-item">
+          <label>Facebook URL / 名前</label>
+          <input type="text" id="sns-facebook" placeholder="事務所名 or URL">
+        </div>
+        <div class="sns-item">
+          <label>事務所名 / お名前</label>
+          <input type="text" id="sns-name" placeholder="○○税理士事務所">
+        </div>
+      </div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button class="btn-save" onclick="saveSettings()">💾 設定を保存</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== CONFIG =====
+const WORKER_URL = 'https://shin-mikke-spc.YOUR_SUBDOMAIN.workers.dev/chat';
+// ↑ Worker作成後にここを書き換えてください
+
+const PASSWORD = 'shin2026'; // ← リリース時に変更
+
+// ===== STATE =====
+let photoBase64 = null;
+let photoMime   = null;
+let selectedSNS = ['threads'];
+
+// ===== MODAL =====
+function openModal(id) {
+  const overlay = document.getElementById('modal-overlay');
+  const modal = document.getElementById(id);
+  overlay.style.display = 'block';
+  modal.style.display = 'block';
+  // CSS transition のためにリペイントを待つ
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    modal.style.opacity = '1';
+    modal.style.transform = 'translate(-50%, -50%)';
+  });
+}
+
+function closeModal(id) {
+  const overlay = document.getElementById('modal-overlay');
+  const modal = document.getElementById(id);
+  overlay.style.opacity = '0';
+  modal.style.opacity = '0';
+  modal.style.transform = 'translate(-50%, -48%)';
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    modal.style.display = 'none';
+  }, 300);
+}
+
+function closeAllModals() {
+  document.querySelectorAll('.modal').forEach(m => {
+    if (m.style.display === 'block') closeModal(m.id);
+  });
+}
+
+// ===== PASSWORD =====
+function checkPW() {
+  const val = document.getElementById('pw-input').value.trim();
+  if (val === PASSWORD) {
+    document.getElementById('password-gate').style.display = 'none';
+    document.getElementById('main-app').style.display = 'block';
+    loadSettings();
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+    document.getElementById('pw-input').classList.add('shake');
+    setTimeout(() => document.getElementById('pw-input').classList.remove('shake'), 400);
+  }
+}
+
+// ===== THEME =====
+function setTheme(mode) {
+  document.body.dataset.theme = mode === 'dark' ? 'dark' : '';
+  document.getElementById('btn-light').classList.toggle('active', mode === 'light');
+  document.getElementById('btn-dark').classList.toggle('active', mode === 'dark');
+  localStorage.setItem('shin_theme', mode);
+}
+
+// ===== SNS TYPE =====
+function toggleSNS(btn) {
+  const sns = btn.dataset.sns;
+  if (btn.classList.contains('active')) {
+    if (selectedSNS.length === 1) return; // 最低1つは選択
+    btn.classList.remove('active');
+    selectedSNS = selectedSNS.filter(s => s !== sns);
+  } else {
+    btn.classList.add('active');
+    selectedSNS.push(sns);
+  }
+}
+
+// ===== PHOTO =====
+function loadPhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    photoBase64 = e.target.result.split(',')[1];
+    photoMime   = file.type;
+    const zone  = document.getElementById('upload-zone');
+    zone.classList.add('has-image');
+    zone.innerHTML = `
+      <img class="preview-img" src="${e.target.result}" alt="プレビュー">
+      <button class="remove-btn" onclick="removePhoto(event)">✕ 写真を外す</button>
+    `;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePhoto(e) {
+  e.stopPropagation();
+  photoBase64 = null;
+  photoMime   = null;
+  const zone  = document.getElementById('upload-zone');
+  zone.classList.remove('has-image');
+  zone.innerHTML = `
+    <div class="upload-icon">📷</div>
+    <div class="upload-text">写真をタップしてアップロード</div>
+    <div class="upload-hint">事務所・スタッフ・業務風景・表彰状など（任意）</div>
+  `;
+  zone.onclick = () => document.getElementById('photo-input').click();
+  document.getElementById('photo-input').value = '';
+}
+
+// ===== SETTINGS =====
+function saveSettings() {
+  const d = {
+    threads:   document.getElementById('sns-threads').value,
+    instagram: document.getElementById('sns-instagram').value,
+    facebook:  document.getElementById('sns-facebook').value,
+    name:      document.getElementById('sns-name').value,
+  };
+  localStorage.setItem('shin_sns', JSON.stringify(d));
+  showToast('💾 設定を保存しました');
+  closeModal('settings-modal');
+}
+
+function loadSettings() {
+  const saved = localStorage.getItem('shin_sns');
+  if (saved) {
+    const d = JSON.parse(saved);
+    document.getElementById('sns-threads').value   = d.threads   || '';
+    document.getElementById('sns-instagram').value = d.instagram || '';
+    document.getElementById('sns-facebook').value  = d.facebook  || '';
+    document.getElementById('sns-name').value      = d.name      || '';
+  }
+  const theme = localStorage.getItem('shin_theme') || 'light';
+  setTheme(theme);
+}
+
+// ===== GENERATE =====
+async function generate() {
+  const hint = document.getElementById('hint-text').value.trim();
+  if (!hint && !photoBase64) {
+    showToast('⚠ 写真またはヒントを入力してください');
+    return;
+  }
+
+  // SNS設定取得
+  const snsData = JSON.parse(localStorage.getItem('shin_sns') || '{}');
+  const snsLabel = selectedSNS.join(' / ');
+
+  // UIを切り替え
+  document.getElementById('btn-generate').disabled = true;
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('result-area').style.display = 'none';
+
+  // メッセージ構築
+  let userText = `投稿先SNS: ${snsLabel}\n`;
+  if (snsData.name)      userText += `事務所・担当者名: ${snsData.name}\n`;
+  if (hint)              userText += `\n状況・補足情報:\n${hint}\n`;
+  if (snsData.threads)   userText += `\nThreadsアカウント: ${snsData.threads}`;
+  if (snsData.instagram) userText += `\nInstagramアカウント: ${snsData.instagram}`;
+  if (snsData.facebook)  userText += `\nFacebook: ${snsData.facebook}`;
+
+  const messages = [{ role: 'user', content: [] }];
+
+  if (photoBase64) {
+    messages[0].content.push({
+      type: 'image',
+      source: { type: 'base64', media_type: photoMime, data: photoBase64 }
+    });
+  }
+
+  messages[0].content.push({ type: 'text', text: userText });
+
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const text = (data.content || []).map(b => b.text || '').join('').trim();
+    renderResult(text);
+  } catch (err) {
+    showToast('⚠ 生成に失敗しました。再度お試しください。');
+    console.error(err);
+  } finally {
+    document.getElementById('btn-generate').disabled = false;
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+
+// ===== RENDER RESULT =====
+function renderResult(text) {
+  const area = document.getElementById('result-content');
+
+  // セクション分割（## で区切る）
+  const sections = text.split(/\n(?=##\s)/);
+  let html = '';
+
+  if (sections.length <= 1) {
+    // 分割なし → そのまま表示
+    html = buildSection('生成された投稿文', text);
+  } else {
+    sections.forEach(sec => {
+      const lines = sec.split('\n');
+      const label = lines[0].replace(/^##\s*/, '').trim();
+      const body  = lines.slice(1).join('\n').trim();
+      html += buildSection(label, body);
+    });
+  }
+
+  area.innerHTML = html;
+  document.getElementById('result-area').style.display = 'block';
+  document.getElementById('result-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function buildSection(label, body) {
+  return `
+    <div class="result-section">
+      <div class="result-label">${label}</div>
+      <div class="result-body" id="rb_${Math.random().toString(36).slice(2)}">${escHtml(body)}</div>
+      <div class="result-actions">
+        <button class="btn-copy" onclick="copySection(this)">📋 コピー</button>
+      </div>
+    </div>
+  `;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copySection(btn) {
+  const body = btn.closest('.result-section').querySelector('.result-body').innerText;
+  
+  // Create a temporary textarea for copying (Works well in iFrame environments)
+  const tempTextArea = document.createElement('textarea');
+  tempTextArea.value = body;
+  document.body.appendChild(tempTextArea);
+  tempTextArea.select();
+  
+  try {
+    document.execCommand('copy');
+    btn.textContent = '✅ コピーしました';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 コピー';
+      btn.classList.remove('copied');
+    }, 2000);
+  } catch (err) {
+    console.error('Failed to copy text: ', err);
+    showToast('⚠ コピーに失敗しました');
+  } finally {
+    document.body.removeChild(tempTextArea);
+  }
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
