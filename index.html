@@ -163,57 +163,6 @@ body {
   border-radius: 2px;
 }
 
-/* ===== PASSWORD GATE ===== */
-.pw-input-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 0 auto;
-}
-
-.pw-input-wrap input {
-  width: 100%;
-  padding: 12px 14px;
-  border: 2px solid var(--border);
-  border-radius: 8px;
-  font-size: 1rem;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.2s;
-  background: var(--off-white);
-  color: var(--text);
-  text-align: center;
-}
-
-.pw-input-wrap input:focus {
-  border-color: var(--navy);
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
-  color: var(--white);
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-family: inherit;
-  font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
-  white-space: nowrap;
-}
-
-.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
-.btn-primary:active { transform: translateY(0); }
-
-.pw-error {
-  color: #e03a3a;
-  font-size: 0.8rem;
-  margin-top: 8px;
-  display: none;
-  text-align: center;
-}
-
 /* ===== SETTINGS ===== */
 .settings-row {
   display: flex;
@@ -848,6 +797,50 @@ body {
   .card { padding: 18px 14px; }
   .app-header { padding: 70px 20px 24px; } /* スマホ時ボタン被り防止 */
 }
+
+/* パスワード入力エリア */
+.pw-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 auto;
+}
+.pw-input-wrap input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--off-white);
+  color: var(--text);
+  text-align: center;
+}
+.pw-input-wrap input:focus { border-color: var(--navy); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+  color: var(--white);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.pw-error {
+  color: #e03a3a;
+  font-size: 0.8rem;
+  margin-top: 8px;
+  display: none;
+  text-align: center;
+}
 </style>
 </head>
 <body>
@@ -1099,11 +1092,13 @@ body {
         <button class="btn-save" onclick="saveSettings()">💾 設定を保存</button>
       </div>
       
-      <!-- デモデータ / クリア アクション -->
+      <!-- デモデータ / クリア アクション / ログインを開く裏技リンク -->
       <div style="margin-top: 40px; text-align: center; font-size: 0.75rem; color: var(--text-soft); opacity: 0.8;">
-        <span style="cursor: pointer; text-decoration: underline;" onclick="setDemoData()">デモデータをセット</span>
-        <span style="margin: 0 12px;">|</span>
-        <span style="cursor: pointer; text-decoration: underline;" onclick="clearData()">設定と入力をクリア</span>
+        <span style="cursor: pointer; text-decoration: underline;" onclick="setDemoData()">デモデータ</span>
+        <span style="margin: 0 8px;">|</span>
+        <span style="cursor: pointer; text-decoration: underline;" onclick="clearData()">全クリア</span>
+        <span style="margin: 0 8px;">|</span>
+        <span style="cursor: pointer; text-decoration: underline;" onclick="openModal('login-modal')">ログイン</span>
       </div>
     </div>
 
@@ -1129,7 +1124,10 @@ body {
 // ===== CONFIG =====
 const PASSWORD = 'shin2026'; // サンクスメールで送る想定の購入者パスワード
 const STRIPE_URL = 'https://buy.stripe.com/4gMdR8ayS0AJ2Cz3kEcV20z'; // ★Stripeの決済リンク
-const apiKey = ""; // Gemini API キー (実行環境で自動付与されます)
+
+// ▼ Cloudflare WorkersのURL
+const WORKER_URL = 'https://shin-mikke.yymmatsu.workers.dev/chat'; 
+
 const MAX_FREE_TRIAL = 3; // 無料お試し回数
 
 // ===== STATE =====
@@ -1190,10 +1188,8 @@ function incrementTrialCount() {
 
 function openPurchaseLink() {
   if (!isPremium && trialCount >= MAX_FREE_TRIAL) {
-    // 実際にはStripeのリンクへ飛ばす
     window.open(STRIPE_URL, '_blank');
   } else {
-    // 体験中もバナークリックで購入ページへ案内できる
     window.open(STRIPE_URL, '_blank');
   }
 }
@@ -1285,15 +1281,12 @@ function insertEventTemplate() {
   
   if (val) {
     const textarea = document.getElementById('hint-text');
-    // すでに入力がある場合は改行して追記、空ならそのまま入力
     if (textarea.value.trim() !== '') {
       textarea.value += '\n' + val;
     } else {
       textarea.value = val;
     }
-    // 挿入後、セレクトボックスを初期状態に戻す
     select.value = '';
-    // テキストエリアにフォーカスを当てる
     textarea.focus();
   }
 }
@@ -1304,7 +1297,6 @@ function openModal(id) {
   const modal = document.getElementById(id);
   overlay.style.display = 'block';
   modal.style.display = 'block';
-  // CSS transition のためにリペイントを待つ
   requestAnimationFrame(() => {
     overlay.style.opacity = '1';
     modal.style.opacity = '1';
@@ -1326,7 +1318,6 @@ function closeModal(id) {
 
 function closeAllModals() {
   document.querySelectorAll('.modal').forEach(m => {
-    // confirm-modalは個別で閉じるため除外
     if (m.id !== 'confirm-modal' && m.style.display === 'block') closeModal(m.id);
   });
 }
@@ -1395,7 +1386,6 @@ function setDemoData() {
     document.getElementById('basic-tel').value = '03-0000-0000';
     document.getElementById('hint-text').value = '本日はスタッフみんなで確定申告の打ち上げを行いました！無事に終わってホッとしています。';
     
-    // 設定を保存してモーダルを閉じる
     saveSettings(); 
     showToast('✨ デモデータをセットしました');
   });
@@ -1403,7 +1393,6 @@ function setDemoData() {
 
 function clearData() {
   showConfirm('すべての設定と入力内容をクリアしますか？\n※この操作は元に戻せません', true, () => {
-    // フォームのクリア
     document.getElementById('sns-threads').value = '';
     document.getElementById('sns-instagram').value = '';
     document.getElementById('sns-facebook').value = '';
@@ -1415,18 +1404,15 @@ function clearData() {
     document.getElementById('basic-tel').value = '';
     document.getElementById('hint-text').value = '';
     
-    // 写真のクリア
     if (photoBase64) {
       removePhoto({ stopPropagation: () => {} });
     }
     
-    // 回数記録とプレミアム状態も含めて全クリアする（テスト用機能として）
     localStorage.removeItem('shin_sns');
     localStorage.removeItem('shin_usage_count');
     localStorage.removeItem('shin_is_premium');
     
-    initTrialState(); // 状態を再初期化
-    
+    initTrialState(); 
     closeModal('settings-modal');
     showToast('🗑️ データをクリアしました');
   });
@@ -1436,7 +1422,6 @@ function clearData() {
 function checkPW() {
   const val = document.getElementById('pw-input').value.trim();
   if (val === PASSWORD) {
-    // パスワード正解でプレミアム状態に
     localStorage.setItem('shin_is_premium', 'true');
     initTrialState();
     closeModal('login-modal');
@@ -1444,7 +1429,6 @@ function checkPW() {
     document.getElementById('pw-input').value = '';
     document.getElementById('pw-error').style.display = 'none';
   } else {
-    // パスワードエラー
     document.getElementById('pw-error').style.display = 'block';
     const input = document.getElementById('pw-input');
     input.style.transform = 'translateX(-10px)';
@@ -1552,7 +1536,6 @@ async function fetchWithBackoff(url, options, maxRetries = 5) {
       const res = await fetch(url, options);
       if (res.ok) return res;
       if (res.status >= 400 && res.status < 500 && res.status !== 429) {
-        // クライアントエラー(429以外)はリトライしない
         return res;
       }
     } catch (e) {
@@ -1568,10 +1551,8 @@ async function fetchWithBackoff(url, options, maxRetries = 5) {
 
 // ===== GENERATE =====
 async function generate() {
-  // 無料枠制限のチェック
   if (!isPremium && trialCount >= MAX_FREE_TRIAL) {
     showToast('⚠️ 無料体験回数が終了しました。ご購入をお願いいたします。');
-    // バナーをハイライトさせる視覚効果
     const banner = document.getElementById('sticky-banner');
     banner.style.transform = 'scale(1.05)';
     setTimeout(() => banner.style.transform = 'scale(1)', 200);
@@ -1584,11 +1565,9 @@ async function generate() {
     return;
   }
 
-  // SNS設定取得
   const snsData = JSON.parse(localStorage.getItem('shin_sns') || '{}');
   const snsLabel = selectedSNS.join('、');
 
-  // UIを切り替え
   const btn = document.getElementById('btn-generate');
   btn.disabled = true;
   btn.classList.add('is-loading');
@@ -1596,13 +1575,23 @@ async function generate() {
   document.getElementById('loading').style.display = 'block';
   document.getElementById('result-area').style.display = 'none';
 
-  // メッセージ構築
-  let userText = `以下の要件でSNS投稿文を作成してください。\n`;
-  userText += `【投稿先SNS】: ${snsLabel}\n`;
-  if (hint)              userText += `【状況・補足情報】:\n${hint}\n`;
+  let userText = `あなたは士業専門の有能なSNSマーケティングアシスタントです。提供された写真（あれば）と状況説明から、見込み客に「信頼感」と「親しみやすさ」を与えるSNS投稿文を作成してください。
+
+以下の各SNSの特性に合わせて書き分けてください：
+- Threads: 会話のきっかけになるような、少しカジュアルで親しみやすいトーン。
+- Instagram: 視覚的な魅力に触れつつ、共感を呼ぶ文章。関連するハッシュタグ(#)をいくつか付ける。
+- Facebook: 信頼感や専門性をしっかり伝える、少しフォーマルで丁寧な文章。
+- 公式LINE: 「こんにちは！」などの挨拶から始まり、読みやすく箇条書きなどを活用した親切なお知らせ。
+- GoogleMap: お店の「最新情報」として、短く端的に伝わるニュース風の文章。
+
+適度に絵文字を使い、読みやすい文章にしてください。
+
+【要件】
+投稿先SNS: ${snsLabel}
+`;
+  if (hint)              userText += `状況・補足情報:\n${hint}\n\n`;
   
-  // 基本情報・アカウント情報の追加
-  userText += `\n【基本情報・アカウント情報】(各SNSの投稿の末尾に記載してください):\n`;
+  userText += `【基本情報・アカウント情報】(各SNSの投稿の末尾に記載してください):\n`;
   if (snsData.name)      userText += `事務所名: ${snsData.name}\n`;
   if (snsData.address)   userText += `住所: ${snsData.address}\n`;
   if (snsData.url)       userText += `ホームページ: ${snsData.url}\n`;
@@ -1615,49 +1604,37 @@ async function generate() {
 
   userText += `\n出力は必ず以下のフォーマットに従ってください。\n各SNS向けの投稿文を「## SNS名用」の形式で見出しをつけて出力してください。`;
 
-  const parts = [{ text: userText }];
+  const messages = [{ role: 'user', content: [] }];
   if (photoBase64) {
-    parts.push({
-      inlineData: {
-        mimeType: photoMime || 'image/jpeg',
-        data: photoBase64
-      }
+    messages[0].content.push({
+      type: 'image',
+      source: { type: 'base64', media_type: photoMime || 'image/jpeg', data: photoBase64 }
     });
   }
-
-  const payload = {
-    contents: [{ role: "user", parts: parts }],
-    systemInstruction: {
-      parts: [{
-        text: `あなたは士業専門の有能なSNSマーケティングアシスタントです。提供された写真（あれば）と状況説明から、見込み客に「信頼感」と「親しみやすさ」を与えるSNS投稿文を作成してください。
-
-以下の各SNSの特性に合わせて書き分けてください：
-- Threads: 会話のきっかけになるような、少しカジュアルで親しみやすいトーン。
-- Instagram: 視覚的な魅力に触れつつ、共感を呼ぶ文章。関連するハッシュタグ(#)をいくつか付ける。
-- Facebook: 信頼感や専門性をしっかり伝える、少しフォーマルで丁寧な文章。
-- 公式LINE: 「こんにちは！」などの挨拶から始まり、読みやすく箇条書きなどを活用した親切なお知らせ。
-- GoogleMap: お店の「最新情報」として、短く端的に伝わるニュース風の文章。
-
-適度に絵文字を使い、読みやすい文章にしてください。`
-      }]
-    }
-  };
+  messages[0].content.push({ type: 'text', text: userText });
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-    const res = await fetchWithBackoff(url, {
+    const res = await fetchWithBackoff(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ messages })
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     
-    // 成功した場合、無料体験回数を消費する
+    let text = '';
+    if (data.candidates && data.candidates[0]) {
+       text = data.candidates[0].content?.parts?.[0]?.text || '';
+    } else if (data.content && Array.isArray(data.content)) {
+       text = data.content.map(b => b.text || '').join('').trim();
+    } else if (data.text) {
+       text = data.text;
+    } else {
+       text = "レスポンスの形式が不明です。";
+    }
+    
     incrementTrialCount();
-    
     renderResult(text);
   } catch (err) {
     showToast('⚠ 生成に失敗しました。再度お試しください。');
@@ -1667,7 +1644,6 @@ async function generate() {
     btn.classList.remove('is-loading');
     btn.innerHTML = '✨ 信頼の言葉を見つける';
     
-    // プレミアム状態、または無料体験回数が残っている場合のみボタンを再有効化
     if (isPremium || trialCount < MAX_FREE_TRIAL) {
       btn.disabled = false;
     }
@@ -1678,13 +1654,10 @@ async function generate() {
 // ===== RENDER RESULT =====
 function renderResult(text) {
   const area = document.getElementById('result-content');
-
-  // セクション分割（## で区切る）
   const sections = text.split(/\n(?=##\s)/);
   let html = '';
 
   if (sections.length <= 1) {
-    // 分割なし → そのまま表示
     html = buildSection('生成された投稿文', text);
   } else {
     sections.forEach(sec => {
@@ -1720,7 +1693,6 @@ function escHtml(str) {
 function copySection(btn) {
   const body = btn.closest('.result-section').querySelector('.result-body').innerText;
   
-  // Create a temporary textarea for copying (Works well in iFrame environments)
   const tempTextArea = document.createElement('textarea');
   tempTextArea.value = body;
   document.body.appendChild(tempTextArea);
@@ -1730,7 +1702,7 @@ function copySection(btn) {
     document.execCommand('copy');
     btn.textContent = '✅ コピーしました';
     btn.classList.add('copied');
-    showToast('✅ コピーしました'); // トースト通知を追加
+    showToast('✅ コピーしました'); 
     setTimeout(() => {
       btn.textContent = '📋 コピー';
       btn.classList.remove('copied');
@@ -1791,18 +1763,14 @@ function showToast(msg) {
 
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', () => {
-  // 無料体験の状態を初期化
   initTrialState();
-  
-  // 保存された設定（SNS情報やテーマ）を読み込む
   loadSettings();
   
-  // 自動的に「現在の月」をカレンダーにセットする
-  const currentMonth = new Date().getMonth() + 1; // 1〜12を取得
+  const currentMonth = new Date().getMonth() + 1;
   const monthSelect = document.getElementById('month-select');
   if (monthSelect) {
     monthSelect.value = currentMonth.toString();
-    updateEventSelect(); // イベントの選択肢もその月に合わせて更新
+    updateEventSelect();
   }
 });
 </script>
