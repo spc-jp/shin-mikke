@@ -41,16 +41,20 @@ body {
   color: var(--text);
   min-height: 100vh;
   transition: background 0.3s, color 0.3s;
+  padding-bottom: 70px; /* 固定バナー用に余白を追加 */
 }
 
 /* ===== HEADER ===== */
 .app-header {
+  position: sticky;
+  top: 0;
+  z-index: 800; /* モーダルやバナーより下、コンテンツより上に設定 */
   background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy-mid) 60%, var(--navy-light) 100%);
   color: var(--white);
   padding: 60px 20px 24px; /* 右上にボタンが入るため上部余白を調整 */
   text-align: center;
-  position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15); /* スクロール時に浮いているように見せる影 */
 }
 
 .app-header::before {
@@ -78,6 +82,13 @@ body {
   letter-spacing: 0.08em;
   color: var(--white);
   position: relative; z-index: 1;
+  cursor: pointer;
+  display: inline-block;
+  transition: opacity 0.2s;
+}
+
+.app-logo:hover {
+  opacity: 0.85;
 }
 
 .app-logo span {
@@ -153,42 +164,25 @@ body {
 }
 
 /* ===== PASSWORD GATE ===== */
-#password-gate {
-  text-align: center;
-  padding: 32px 20px;
-}
-
-#password-gate h2 {
-  font-family: 'Shippori Mincho', serif;
-  font-size: 1.2rem;
-  color: var(--navy);
-  margin-bottom: 8px;
-}
-
-#password-gate p {
-  font-size: 0.82rem;
-  color: var(--text-soft);
-  margin-bottom: 20px;
-}
-
 .pw-input-wrap {
   display: flex;
-  gap: 8px;
-  max-width: 320px;
+  flex-direction: column;
+  gap: 12px;
   margin: 0 auto;
 }
 
 .pw-input-wrap input {
-  flex: 1;
-  padding: 10px 14px;
+  width: 100%;
+  padding: 12px 14px;
   border: 2px solid var(--border);
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-family: inherit;
   outline: none;
   transition: border-color 0.2s;
   background: var(--off-white);
   color: var(--text);
+  text-align: center;
 }
 
 .pw-input-wrap input:focus {
@@ -199,9 +193,9 @@ body {
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
   color: var(--white);
   border: none;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border-radius: 8px;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-family: inherit;
   font-weight: 700;
   cursor: pointer;
@@ -212,21 +206,13 @@ body {
 .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
 .btn-primary:active { transform: translateY(0); }
 
-.pw-note {
-  font-size: 0.75rem;
-  color: var(--text-soft);
-  margin-top: 10px;
-}
-
 .pw-error {
   color: #e03a3a;
   font-size: 0.8rem;
   margin-top: 8px;
   display: none;
+  text-align: center;
 }
-
-/* ===== MAIN APP ===== */
-#main-app { display: none; }
 
 /* ===== SETTINGS ===== */
 .settings-row {
@@ -372,7 +358,24 @@ body {
 
 .remove-btn:hover { background: rgba(224,58,58,0.15); }
 
-/* ===== TEXTAREA ===== */
+/* ===== TEXTAREA & SELECT ===== */
+.hint-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  font-family: inherit;
+  margin-bottom: 8px;
+  background: var(--off-white);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+.hint-select:focus { border-color: var(--navy); }
+
 .hint-area {
   width: 100%;
   padding: 12px 14px;
@@ -442,10 +445,15 @@ body {
   transition: opacity 0.2s, transform 0.1s;
 }
 
-.btn-generate:hover { opacity: 0.88; transform: translateY(-1px); }
-.btn-generate:active { transform: translateY(0); }
+.btn-generate:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+.btn-generate:active:not(:disabled) { transform: translateY(0); }
+.btn-generate:disabled {
+  background: var(--border);
+  color: var(--text-soft);
+  cursor: not-allowed;
+}
 
-.btn-generate::after {
+.btn-generate:not(:disabled)::after {
   content: '';
   position: absolute;
   top: 0; left: -100%;
@@ -460,6 +468,32 @@ body {
 }
 
 /* ===== LOADING ===== */
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-generate.is-loading {
+  background: linear-gradient(135deg, var(--navy-mid) 0%, var(--navy-light) 100%);
+  background-size: 200% 200%;
+  animation: pulseBg 2s ease infinite;
+}
+@keyframes pulseBg {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 .loading-wrap {
   text-align: center;
   padding: 32px;
@@ -520,6 +554,14 @@ body {
   white-space: pre-wrap;
   color: var(--text);
   background: var(--off-white);
+  transition: all 0.2s;
+}
+
+/* 編集可能エリアにフォーカスが当たった時のスタイル */
+.result-body[contenteditable="true"]:focus {
+  background: var(--white);
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--navy-light);
 }
 
 .result-actions {
@@ -549,6 +591,30 @@ body {
 }
 
 .btn-copy.copied {
+  background: #2a7a4a;
+  border-color: #2a7a4a;
+  color: var(--white);
+}
+
+.btn-copy-all {
+  padding: 6px 14px;
+  border: 1.5px solid var(--navy);
+  border-radius: 7px;
+  background: var(--white);
+  color: var(--navy);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-copy-all:hover {
+  background: var(--navy);
+  color: var(--white);
+}
+
+.btn-copy-all.copied {
   background: #2a7a4a;
   border-color: #2a7a4a;
   color: var(--white);
@@ -650,6 +716,44 @@ body {
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* ===== STICKY BANNER (無料体験用) ===== */
+.sticky-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 14px 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  z-index: 900;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 通常のゴールドバナー */
+.sticky-banner.gold {
+  background: linear-gradient(135deg, #d4af37 0%, #f3e5ab 100%);
+  color: #1a2a4a;
+}
+.sticky-banner.gold:hover {
+  background: linear-gradient(135deg, #e6c249 0%, #fff2c4 100%);
+}
+
+/* 終了時のレッドバナー */
+.sticky-banner.ended {
+  background: linear-gradient(135deg, #d32f2f 0%, #e57373 100%);
+  color: #ffffff;
+}
+.sticky-banner.ended:hover {
+  background: linear-gradient(135deg, #e53935 0%, #ef9a9a 100%);
+}
+
 /* 使い方テキスト用 */
 .howto-purpose {
   background: var(--off-white);
@@ -717,7 +821,7 @@ body {
 /* ===== TOAST ===== */
 .toast {
   position: fixed;
-  bottom: 24px;
+  bottom: 80px; /* バナーの分上げる */
   left: 50%;
   transform: translateX(-50%) translateY(20px);
   background: var(--navy);
@@ -742,6 +846,7 @@ body {
   .app-logo { font-size: 1.8rem; }
   .sns-grid { grid-template-columns: 1fr; }
   .card { padding: 18px 14px; }
+  .app-header { padding: 70px 20px 24px; } /* スマホ時ボタン被り防止 */
 }
 </style>
 </head>
@@ -753,19 +858,15 @@ body {
     <button class="header-btn" onclick="openModal('howto-modal')">❓ 使い方</button>
     <button class="header-btn" onclick="openModal('settings-modal')">⚙️ 設定</button>
   </div>
-  <div class="app-logo">信<span>みっけ</span></div>
+  <div class="app-logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">信<span>みっけ</span></div>
   <div class="app-tagline">TRUST FINDER FOR PROFESSIONALS</div>
   <div class="app-subtitle">
     事務所・スタッフ・業務風景写真から<br>
     信頼訴求・相談誘導のSNS投稿文を自動生成
   </div>
-  <div class="free-badge">🎁 リリース記念 2ヶ月間 無料モニター実施中</div>
 </div>
 
 <div class="container">
-
-  <!-- PASSWORD GATE (テスト中は非表示) -->
-  <!-- <div class="card" id="password-gate"> ... </div> -->
 
   <!-- MAIN APP -->
   <div id="main-app" style="display:block">
@@ -792,15 +893,40 @@ body {
           <button class="sns-type-btn" data-sns="instagram" onclick="toggleSNS(this)">Instagram</button>
           <button class="sns-type-btn" data-sns="facebook" onclick="toggleSNS(this)">Facebook</button>
           <button class="sns-type-btn" data-sns="line" onclick="toggleSNS(this)">公式LINE</button>
+          <button class="sns-type-btn" data-sns="googlemap" onclick="toggleSNS(this)">GoogleMap</button>
         </div>
       </div>
 
-      <!-- HINT TEXT -->
-      <div class="hint-label">
-        📝 ヒント・補足情報（写真がない場合はここに状況を入力してください）<br>
-        <span style="font-size:0.72rem;opacity:0.7;">例：「確定申告期終了後のスタッフ打ち上げ写真」「顧問先から感謝状をいただきました」「新人スタッフが初めて一人で記帳を終えた日」</span>
+      <!-- HINT TEXT (カレンダー連動) -->
+      <div class="hint-label" style="margin-bottom: 6px;">
+        📝 ヒント・補足情報<br>
+        <span style="font-size:0.72rem;opacity:0.8;">※写真がない場合は、以下のカレンダーから行事を選ぶだけで簡単に投稿文が作れます。</span>
       </div>
-      <textarea class="hint-area" id="hint-text" placeholder="ここに写真の説明や伝えたいことを入力してください（写真なしでも生成できます）"></textarea>
+      
+      <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+        <select id="month-select" class="hint-select" style="flex: 1; margin-bottom: 0;" onchange="updateEventSelect()">
+          <option value="">▼ 月を選択</option>
+          <option value="1">1月</option>
+          <option value="2">2月</option>
+          <option value="3">3月</option>
+          <option value="4">4月</option>
+          <option value="5">5月</option>
+          <option value="6">6月</option>
+          <option value="7">7月</option>
+          <option value="8">8月</option>
+          <option value="9">9月</option>
+          <option value="10">10月</option>
+          <option value="11">11月</option>
+          <option value="12">12月</option>
+          <option value="all">通年・その他</option>
+        </select>
+        
+        <select id="event-select" class="hint-select" style="flex: 2; margin-bottom: 0;" onchange="insertEventTemplate()" disabled>
+          <option value="">▼ 行事・イベントを選択</option>
+        </select>
+      </div>
+
+      <textarea class="hint-area" id="hint-text" placeholder="カレンダーから選ぶか、ここに写真の説明や伝えたいことを入力してください（直接入力も可能です）"></textarea>
 
       <button class="btn-generate" id="btn-generate" onclick="generate()">
         ✨ 信頼の言葉を見つける
@@ -818,7 +944,10 @@ body {
     <!-- RESULT -->
     <div id="result-area" class="result-wrap">
       <div class="card">
-        <div class="card-title">生成された投稿文</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div class="card-title" style="margin-bottom: 0;">生成された投稿文</div>
+          <button class="btn-copy-all" onclick="copyAllResults(this)">📋 すべてコピー</button>
+        </div>
         <div id="result-content"></div>
         <div class="footer-note" style="margin-top:16px;">
           💡 提案内容はアイデアの種として、あなたらしい言葉にアレンジしてご活用ください
@@ -830,13 +959,34 @@ body {
 
   <div class="footer-note">
     信みっけ — 士業のための信頼可視化ツール<br>
-    © 2026 SPCウェブマネジメントサービス
+    Powered by SPC
   </div>
 
 </div><!-- /container -->
 
 <!-- MODAL OVERLAY -->
 <div id="modal-overlay" class="modal-overlay" onclick="closeAllModals()"></div>
+
+<!-- LOGIN MODAL -->
+<div id="login-modal" class="modal" style="max-width: 400px;">
+  <div class="modal-header">
+    <div class="modal-title">🔑 購入済の方（ログイン）</div>
+    <button class="modal-close" onclick="closeModal('login-modal')">&times;</button>
+  </div>
+  <div class="modal-body" style="text-align: center;">
+    <p style="font-size: 0.88rem; color: var(--text-soft); margin-bottom: 20px; line-height: 1.6;">
+      購入後にメールで案内された<br>「パスワード」を入力してください。
+    </p>
+    <div class="pw-input-wrap">
+      <input type="password" id="pw-input" placeholder="パスワードを入力">
+      <button class="btn-primary" onclick="checkPW()">制限を解除する</button>
+    </div>
+    <div class="pw-error" id="pw-error">⚠️ パスワードが違います</div>
+    <div style="margin-top: 24px; font-size: 0.8rem;">
+      <a href="javascript:void(0)" onclick="openPurchaseLink()" style="color: var(--accent); font-weight: 600;">▶ まだ購入されていない方はこちら</a>
+    </div>
+  </div>
+</div>
 
 <!-- HOW TO MODAL -->
 <div id="howto-modal" class="modal">
@@ -894,6 +1044,34 @@ body {
 
     <div class="divider"></div>
 
+    <div style="margin-bottom: 24px;">
+      <div style="font-weight:600; color:var(--text); margin-bottom:8px; font-size:0.9rem;">基本情報</div>
+      <div class="sns-grid">
+        <div class="sns-item" style="grid-column: 1 / -1;">
+          <label>事務所名</label>
+          <input type="text" id="basic-name" placeholder="○○税理士事務所">
+        </div>
+        <div class="sns-item" style="grid-column: 1 / -1;">
+          <label>住所</label>
+          <input type="text" id="basic-address" placeholder="東京都...">
+        </div>
+        <div class="sns-item" style="grid-column: 1 / -1;">
+          <label>ホームページURL</label>
+          <input type="text" id="basic-url" placeholder="https://...">
+        </div>
+        <div class="sns-item">
+          <label>連絡先メールアドレス</label>
+          <input type="email" id="basic-email" placeholder="info@example.com">
+        </div>
+        <div class="sns-item">
+          <label>電話番号</label>
+          <input type="tel" id="basic-tel" placeholder="03-0000-0000">
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
     <div>
       <div style="font-weight:600; color:var(--text); margin-bottom:8px; font-size:0.9rem;">SNSアカウント設定（任意）</div>
       <p style="font-size:0.78rem;color:var(--text-soft);margin-bottom:14px;">
@@ -913,31 +1091,212 @@ body {
           <input type="text" id="sns-facebook" placeholder="事務所名 or URL">
         </div>
         <div class="sns-item">
-          <label>事務所名 / お名前</label>
-          <input type="text" id="sns-name" placeholder="○○税理士事務所">
+          <label>GoogleMap URL</label>
+          <input type="text" id="sns-googlemap" placeholder="https://maps.app.goo.gl/...">
         </div>
       </div>
       <div style="text-align: right; margin-top: 20px;">
         <button class="btn-save" onclick="saveSettings()">💾 設定を保存</button>
+      </div>
+      
+      <!-- デモデータ / クリア アクション -->
+      <div style="margin-top: 40px; text-align: center; font-size: 0.75rem; color: var(--text-soft); opacity: 0.8;">
+        <span style="cursor: pointer; text-decoration: underline;" onclick="setDemoData()">デモデータをセット</span>
+        <span style="margin: 0 12px;">|</span>
+        <span style="cursor: pointer; text-decoration: underline;" onclick="clearData()">設定と入力をクリア</span>
       </div>
     </div>
 
   </div>
 </div>
 
+<!-- CONFIRM MODAL -->
+<div id="confirm-modal" class="modal" style="max-width: 360px; text-align: center; padding: 32px 24px;">
+  <div style="font-size: 2rem; margin-bottom: 12px;">⚠️</div>
+  <div id="confirm-message" style="font-weight: 600; color: var(--text); margin-bottom: 24px; line-height: 1.6;"></div>
+  <div style="display: flex; gap: 12px; justify-content: center;">
+    <button style="flex:1; padding: 10px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--white); color: var(--text-soft); font-weight: 600; cursor: pointer; font-family: inherit;" onclick="closeConfirmModal()">キャンセル</button>
+    <button id="confirm-ok-btn" style="flex:1; padding: 10px; border-radius: 8px; border: none; background: #e03a3a; color: white; font-weight: 600; cursor: pointer; font-family: inherit;">実行する</button>
+  </div>
+</div>
+
+<!-- フローティングバナー -->
+<div id="sticky-banner" class="sticky-banner" style="display: none;" onclick="openPurchaseLink()"></div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 // ===== CONFIG =====
-const WORKER_URL = 'https://shin-mikke-spc.YOUR_SUBDOMAIN.workers.dev/chat';
-// ↑ Worker作成後にここを書き換えてください
-
-const PASSWORD = 'shin2026'; // ← リリース時に変更
+const PASSWORD = 'shin2026'; // サンクスメールで送る想定の購入者パスワード
+const STRIPE_URL = 'https://buy.stripe.com/4gMdR8ayS0AJ2Cz3kEcV20z'; // ★Stripeの決済リンク
+const apiKey = ""; // Gemini API キー (実行環境で自動付与されます)
+const MAX_FREE_TRIAL = 3; // 無料お試し回数
 
 // ===== STATE =====
 let photoBase64 = null;
 let photoMime   = null;
 let selectedSNS = ['threads'];
+let isPremium = false;
+let trialCount = 0;
+
+// ===== TRIAL & PREMIUM MANAGEMENT =====
+function initTrialState() {
+  isPremium = localStorage.getItem('shin_is_premium') === 'true';
+  trialCount = parseInt(localStorage.getItem('shin_usage_count') || '0', 10);
+  updateBannerAndButton();
+}
+
+function updateBannerAndButton() {
+  const banner = document.getElementById('sticky-banner');
+  const generateBtn = document.getElementById('btn-generate');
+  
+  if (isPremium) {
+    // 購入済みの場合はバナー非表示、ボタンは常に有効
+    banner.style.display = 'none';
+    generateBtn.disabled = false;
+    document.body.style.paddingBottom = '0';
+    return;
+  }
+  
+  // 無料枠の状態
+  banner.style.display = 'flex';
+  document.body.style.paddingBottom = '70px';
+  banner.className = 'sticky-banner'; // クラスリセット
+  
+  const remaining = MAX_FREE_TRIAL - trialCount;
+  
+  if (trialCount === 0) {
+    banner.classList.add('gold');
+    banner.innerHTML = `🎁 今なら${MAX_FREE_TRIAL}回まで無料でお試しいただけます（登録不要）`;
+    generateBtn.disabled = false;
+  } else if (remaining > 0) {
+    banner.classList.add('gold');
+    banner.innerHTML = `🎁 無料体験 残り${remaining}回（全${MAX_FREE_TRIAL}回）`;
+    generateBtn.disabled = false;
+  } else {
+    // 体験終了
+    banner.classList.add('ended');
+    banner.innerHTML = `⚠️ 無料体験が終了しました ご購入はこちら ▶`;
+    generateBtn.disabled = true; // ボタンを無効化
+  }
+}
+
+function incrementTrialCount() {
+  if (isPremium) return;
+  trialCount++;
+  localStorage.setItem('shin_usage_count', trialCount.toString());
+  updateBannerAndButton();
+}
+
+function openPurchaseLink() {
+  if (!isPremium && trialCount >= MAX_FREE_TRIAL) {
+    // 実際にはStripeのリンクへ飛ばす
+    window.open(STRIPE_URL, '_blank');
+  } else {
+    // 体験中もバナークリックで購入ページへ案内できる
+    window.open(STRIPE_URL, '_blank');
+  }
+}
+
+// ===== TAX CALENDAR EVENTS =====
+const taxEvents = {
+  "1": [
+    { label: "法定調書の提出", val: "1月31日は法定調書の提出期限です。当事務所でも皆様のサポートを全力で行っております！" },
+    { label: "償却資産申告書の提出", val: "1月31日は償却資産申告書の提出期限です。対象となる資産がある場合はお忘れなく。" },
+    { label: "給与支払報告書の提出", val: "各市町村への給与支払報告書の提出期限が近づいています。早めの準備が安心です。" }
+  ],
+  "2": [
+    { label: "所得税の確定申告開始", val: "いよいよ所得税の確定申告が始まりました！お困りのことがあればお早めに当事務所へご相談ください。" }
+  ],
+  "3": [
+    { label: "所得税の確定申告期限", val: "3月15日は所得税の確定申告期限です。ラストスパート、スタッフ一同頑張っております！" },
+    { label: "個人事業主の消費税申告期限", val: "個人事業主の方の消費税申告期限は3月末です。期限内の申告・納付をお願いいたします。" }
+  ],
+  "4": [
+    { label: "3月決算法人の決算準備", val: "多くの企業で新年度がスタートしました。3月決算の法人様は決算・申告準備を進めていきましょう。" },
+    { label: "固定資産税の第1期納付", val: "固定資産税・都市計画税の第1期納付時期です。" }
+  ],
+  "5": [
+    { label: "3月決算法人の確定申告期限", val: "5月末は3月決算法人様の申告期限です。無事に申告を終えられるようサポートいたします。" },
+    { label: "自動車税の納付期限", val: "5月末は自動車税の納付期限です。業務で使用している車両の納付忘れにご注意ください。" }
+  ],
+  "6": [
+    { label: "住民税の特別徴収切り替え", val: "今月給与から新しい住民税の天引き（特別徴収）が始まります。給与計算の際はお気をつけください。" },
+    { label: "源泉所得税(納期の特例)の準備", val: "7月10日期限の「源泉所得税の納期の特例」に向けた計算準備の時期です。" }
+  ],
+  "7": [
+    { label: "源泉所得税(納期の特例)の納付", val: "7月10日は源泉所得税（納期の特例分）の納付期限です。上半期分の納付をお忘れなく。" },
+    { label: "社会保険の算定基礎届提出", val: "社会保険料の決定に必要な「算定基礎届」の提出期限は7月10日です。" },
+    { label: "労働保険の年度更新", val: "労働保険の年度更新手続きはお済みですか？期限内の手続きをサポートしております。" }
+  ],
+  "8": [
+    { label: "個人事業税の第1期納付", val: "8月末は個人事業税の第1期納付期限です。納付書が届いている方はお忘れなく。" }
+  ],
+  "9": [
+    { label: "決算の事前対策", val: "期末に向けての業績確認や節税対策など、事前の決算対策ミーティングを行っています。" }
+  ],
+  "10": [
+    { label: "年末調整の準備開始", val: "そろそろ年末調整の準備を始める時期です。早めのスケジュール立てがスムーズな処理のコツです。" },
+    { label: "最低賃金の改定", val: "10月から各都道府県で最低賃金が改定されます。給与計算の際は必ずご確認ください。" }
+  ],
+  "11": [
+    { label: "年末調整書類の配布", val: "従業員の皆様へ年末調整の申告書を配布・回収する時期です。ご不明点はお気軽にご相談を。" },
+    { label: "個人事業税の第2期納付", val: "11月末は個人事業税の第2期納付期限です。" }
+  ],
+  "12": [
+    { label: "年末調整の計算と還付", val: "年末調整の計算がピークを迎えています。年内最後の給与で過不足額を精算します。" },
+    { label: "年末のご挨拶・冬季休業のお知らせ", val: "今年も一年間ありがとうございました。当事務所の年末年始の休業期間についてお知らせします。" }
+  ],
+  "all": [
+    { label: "お客様からの感謝の言葉・頂き物", val: "顧問先のお客様から温かいお言葉（お菓子など）をいただきました！これからもスタッフ一同頑張ります。" },
+    { label: "スタッフの成長・日常風景", val: "新人スタッフが初めて一人で業務をやり遂げました！日々の成長がとても頼もしいです。" },
+    { label: "所内研修・勉強会の実施", val: "最新の税制改正について所内勉強会を実施しました。常に知識をアップデートして皆様をサポートします。" }
+  ]
+};
+
+// ===== TEMPLATE INSERT =====
+function updateEventSelect() {
+  const month = document.getElementById('month-select').value;
+  const eventSelect = document.getElementById('event-select');
+  
+  // セレクトボックスをリセット
+  eventSelect.innerHTML = '<option value="">▼ 行事・イベントを選択</option>';
+  
+  if (!month) {
+    eventSelect.disabled = true;
+    return;
+  }
+  
+  // 選択された月に応じたイベントを追加
+  eventSelect.disabled = false;
+  const events = taxEvents[month] || [];
+  
+  events.forEach(ev => {
+    const opt = document.createElement('option');
+    opt.value = ev.val;
+    opt.textContent = ev.label;
+    eventSelect.appendChild(opt);
+  });
+}
+
+function insertEventTemplate() {
+  const select = document.getElementById('event-select');
+  const val = select.value;
+  
+  if (val) {
+    const textarea = document.getElementById('hint-text');
+    // すでに入力がある場合は改行して追記、空ならそのまま入力
+    if (textarea.value.trim() !== '') {
+      textarea.value += '\n' + val;
+    } else {
+      textarea.value = val;
+    }
+    // 挿入後、セレクトボックスを初期状態に戻す
+    select.value = '';
+    // テキストエリアにフォーカスを当てる
+    textarea.focus();
+  }
+}
 
 // ===== MODAL =====
 function openModal(id) {
@@ -967,21 +1326,131 @@ function closeModal(id) {
 
 function closeAllModals() {
   document.querySelectorAll('.modal').forEach(m => {
-    if (m.style.display === 'block') closeModal(m.id);
+    // confirm-modalは個別で閉じるため除外
+    if (m.id !== 'confirm-modal' && m.style.display === 'block') closeModal(m.id);
   });
 }
 
-// ===== PASSWORD =====
+// ===== DEMO & CLEAR DATA =====
+function showConfirm(msg, isDestructive, callback) {
+  document.getElementById('confirm-message').innerHTML = msg.replace(/\n/g, '<br>');
+  const okBtn = document.getElementById('confirm-ok-btn');
+  okBtn.style.background = isDestructive ? '#e03a3a' : 'var(--navy)';
+  okBtn.onclick = () => {
+    closeConfirmModal();
+    if (callback) callback();
+  };
+  
+  const confirmModal = document.getElementById('confirm-modal');
+  confirmModal.style.zIndex = '1005';
+  
+  let secOverlay = document.getElementById('sec-overlay');
+  if (!secOverlay) {
+    secOverlay = document.createElement('div');
+    secOverlay.id = 'sec-overlay';
+    secOverlay.className = 'modal-overlay';
+    secOverlay.style.zIndex = '1004';
+    secOverlay.onclick = closeConfirmModal;
+    document.body.appendChild(secOverlay);
+  }
+  
+  secOverlay.style.display = 'block';
+  confirmModal.style.display = 'block';
+  
+  requestAnimationFrame(() => {
+    secOverlay.style.opacity = '1';
+    confirmModal.style.opacity = '1';
+    confirmModal.style.transform = 'translate(-50%, -50%)';
+  });
+}
+
+function closeConfirmModal() {
+  const confirmModal = document.getElementById('confirm-modal');
+  const secOverlay = document.getElementById('sec-overlay');
+  
+  if (confirmModal) {
+    confirmModal.style.opacity = '0';
+    confirmModal.style.transform = 'translate(-50%, -48%)';
+  }
+  if (secOverlay) {
+    secOverlay.style.opacity = '0';
+  }
+  
+  setTimeout(() => {
+    if (confirmModal) confirmModal.style.display = 'none';
+    if (secOverlay) secOverlay.style.display = 'none';
+  }, 300);
+}
+
+function setDemoData() {
+  showConfirm('入力欄にデモデータをセットしますか？', false, () => {
+    document.getElementById('sns-threads').value = '@demo_tax';
+    document.getElementById('sns-instagram').value = '@demo_tax_office';
+    document.getElementById('sns-facebook').value = 'デモ税理士事務所';
+    document.getElementById('sns-googlemap').value = 'https://maps.app.goo.gl/demo';
+    document.getElementById('basic-name').value = '山田太郎（税理士）';
+    document.getElementById('basic-address').value = '東京都千代田区デモ1-2-3';
+    document.getElementById('basic-url').value = 'https://example.com';
+    document.getElementById('basic-email').value = 'info@example.com';
+    document.getElementById('basic-tel').value = '03-0000-0000';
+    document.getElementById('hint-text').value = '本日はスタッフみんなで確定申告の打ち上げを行いました！無事に終わってホッとしています。';
+    
+    // 設定を保存してモーダルを閉じる
+    saveSettings(); 
+    showToast('✨ デモデータをセットしました');
+  });
+}
+
+function clearData() {
+  showConfirm('すべての設定と入力内容をクリアしますか？\n※この操作は元に戻せません', true, () => {
+    // フォームのクリア
+    document.getElementById('sns-threads').value = '';
+    document.getElementById('sns-instagram').value = '';
+    document.getElementById('sns-facebook').value = '';
+    document.getElementById('sns-googlemap').value = '';
+    document.getElementById('basic-name').value = '';
+    document.getElementById('basic-address').value = '';
+    document.getElementById('basic-url').value = '';
+    document.getElementById('basic-email').value = '';
+    document.getElementById('basic-tel').value = '';
+    document.getElementById('hint-text').value = '';
+    
+    // 写真のクリア
+    if (photoBase64) {
+      removePhoto({ stopPropagation: () => {} });
+    }
+    
+    // 回数記録とプレミアム状態も含めて全クリアする（テスト用機能として）
+    localStorage.removeItem('shin_sns');
+    localStorage.removeItem('shin_usage_count');
+    localStorage.removeItem('shin_is_premium');
+    
+    initTrialState(); // 状態を再初期化
+    
+    closeModal('settings-modal');
+    showToast('🗑️ データをクリアしました');
+  });
+}
+
+// ===== PASSWORD LOGIC =====
 function checkPW() {
   const val = document.getElementById('pw-input').value.trim();
   if (val === PASSWORD) {
-    document.getElementById('password-gate').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-    loadSettings();
+    // パスワード正解でプレミアム状態に
+    localStorage.setItem('shin_is_premium', 'true');
+    initTrialState();
+    closeModal('login-modal');
+    showToast('✨ 制限が解除されました！ご利用ありがとうございます。');
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-error').style.display = 'none';
   } else {
+    // パスワードエラー
     document.getElementById('pw-error').style.display = 'block';
-    document.getElementById('pw-input').classList.add('shake');
-    setTimeout(() => document.getElementById('pw-input').classList.remove('shake'), 400);
+    const input = document.getElementById('pw-input');
+    input.style.transform = 'translateX(-10px)';
+    setTimeout(() => input.style.transform = 'translateX(10px)', 100);
+    setTimeout(() => input.style.transform = 'translateX(-10px)', 200);
+    setTimeout(() => input.style.transform = 'translateX(0)', 300);
   }
 }
 
@@ -1045,7 +1514,12 @@ function saveSettings() {
     threads:   document.getElementById('sns-threads').value,
     instagram: document.getElementById('sns-instagram').value,
     facebook:  document.getElementById('sns-facebook').value,
-    name:      document.getElementById('sns-name').value,
+    googlemap: document.getElementById('sns-googlemap').value,
+    name:      document.getElementById('basic-name').value,
+    address:   document.getElementById('basic-address').value,
+    url:       document.getElementById('basic-url').value,
+    email:     document.getElementById('basic-email').value,
+    tel:       document.getElementById('basic-tel').value,
   };
   localStorage.setItem('shin_sns', JSON.stringify(d));
   showToast('💾 設定を保存しました');
@@ -1059,14 +1533,51 @@ function loadSettings() {
     document.getElementById('sns-threads').value   = d.threads   || '';
     document.getElementById('sns-instagram').value = d.instagram || '';
     document.getElementById('sns-facebook').value  = d.facebook  || '';
-    document.getElementById('sns-name').value      = d.name      || '';
+    document.getElementById('sns-googlemap').value = d.googlemap || '';
+    document.getElementById('basic-name').value    = d.name      || '';
+    document.getElementById('basic-address').value = d.address   || '';
+    document.getElementById('basic-url').value     = d.url       || '';
+    document.getElementById('basic-email').value   = d.email     || '';
+    document.getElementById('basic-tel').value     = d.tel       || '';
   }
   const theme = localStorage.getItem('shin_theme') || 'light';
   setTheme(theme);
 }
 
+// ===== API CALL WITH BACKOFF =====
+async function fetchWithBackoff(url, options, maxRetries = 5) {
+  let delay = 1000;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.ok) return res;
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+        // クライアントエラー(429以外)はリトライしない
+        return res;
+      }
+    } catch (e) {
+      if (i === maxRetries - 1) throw e;
+    }
+    if (i < maxRetries - 1) {
+      await new Promise(r => setTimeout(r, delay));
+      delay *= 2;
+    }
+  }
+  throw new Error("API calls failed after retries.");
+}
+
 // ===== GENERATE =====
 async function generate() {
+  // 無料枠制限のチェック
+  if (!isPremium && trialCount >= MAX_FREE_TRIAL) {
+    showToast('⚠️ 無料体験回数が終了しました。ご購入をお願いいたします。');
+    // バナーをハイライトさせる視覚効果
+    const banner = document.getElementById('sticky-banner');
+    banner.style.transform = 'scale(1.05)';
+    setTimeout(() => banner.style.transform = 'scale(1)', 200);
+    return;
+  }
+
   const hint = document.getElementById('hint-text').value.trim();
   if (!hint && !photoBase64) {
     showToast('⚠ 写真またはヒントを入力してください');
@@ -1075,48 +1586,91 @@ async function generate() {
 
   // SNS設定取得
   const snsData = JSON.parse(localStorage.getItem('shin_sns') || '{}');
-  const snsLabel = selectedSNS.join(' / ');
+  const snsLabel = selectedSNS.join('、');
 
   // UIを切り替え
-  document.getElementById('btn-generate').disabled = true;
+  const btn = document.getElementById('btn-generate');
+  btn.disabled = true;
+  btn.classList.add('is-loading');
+  btn.innerHTML = '✨ 言葉を探しています <span class="spinner"></span>';
   document.getElementById('loading').style.display = 'block';
   document.getElementById('result-area').style.display = 'none';
 
   // メッセージ構築
-  let userText = `投稿先SNS: ${snsLabel}\n`;
-  if (snsData.name)      userText += `事務所・担当者名: ${snsData.name}\n`;
-  if (hint)              userText += `\n状況・補足情報:\n${hint}\n`;
-  if (snsData.threads)   userText += `\nThreadsアカウント: ${snsData.threads}`;
-  if (snsData.instagram) userText += `\nInstagramアカウント: ${snsData.instagram}`;
-  if (snsData.facebook)  userText += `\nFacebook: ${snsData.facebook}`;
+  let userText = `以下の要件でSNS投稿文を作成してください。\n`;
+  userText += `【投稿先SNS】: ${snsLabel}\n`;
+  if (hint)              userText += `【状況・補足情報】:\n${hint}\n`;
+  
+  // 基本情報・アカウント情報の追加
+  userText += `\n【基本情報・アカウント情報】(各SNSの投稿の末尾に記載してください):\n`;
+  if (snsData.name)      userText += `事務所名: ${snsData.name}\n`;
+  if (snsData.address)   userText += `住所: ${snsData.address}\n`;
+  if (snsData.url)       userText += `ホームページ: ${snsData.url}\n`;
+  if (snsData.email)     userText += `メール: ${snsData.email}\n`;
+  if (snsData.tel)       userText += `電話番号: ${snsData.tel}\n`;
+  if (snsData.threads)   userText += `Threads: ${snsData.threads}\n`;
+  if (snsData.instagram) userText += `Instagram: ${snsData.instagram}\n`;
+  if (snsData.facebook)  userText += `Facebook: ${snsData.facebook}\n`;
+  if (snsData.googlemap) userText += `GoogleMap: ${snsData.googlemap}\n`;
 
-  const messages = [{ role: 'user', content: [] }];
+  userText += `\n出力は必ず以下のフォーマットに従ってください。\n各SNS向けの投稿文を「## SNS名用」の形式で見出しをつけて出力してください。`;
 
+  const parts = [{ text: userText }];
   if (photoBase64) {
-    messages[0].content.push({
-      type: 'image',
-      source: { type: 'base64', media_type: photoMime, data: photoBase64 }
+    parts.push({
+      inlineData: {
+        mimeType: photoMime || 'image/jpeg',
+        data: photoBase64
+      }
     });
   }
 
-  messages[0].content.push({ type: 'text', text: userText });
+  const payload = {
+    contents: [{ role: "user", parts: parts }],
+    systemInstruction: {
+      parts: [{
+        text: `あなたは士業専門の有能なSNSマーケティングアシスタントです。提供された写真（あれば）と状況説明から、見込み客に「信頼感」と「親しみやすさ」を与えるSNS投稿文を作成してください。
+
+以下の各SNSの特性に合わせて書き分けてください：
+- Threads: 会話のきっかけになるような、少しカジュアルで親しみやすいトーン。
+- Instagram: 視覚的な魅力に触れつつ、共感を呼ぶ文章。関連するハッシュタグ(#)をいくつか付ける。
+- Facebook: 信頼感や専門性をしっかり伝える、少しフォーマルで丁寧な文章。
+- 公式LINE: 「こんにちは！」などの挨拶から始まり、読みやすく箇条書きなどを活用した親切なお知らせ。
+- GoogleMap: お店の「最新情報」として、短く端的に伝わるニュース風の文章。
+
+適度に絵文字を使い、読みやすい文章にしてください。`
+      }]
+    }
+  };
 
   try {
-    const res = await fetch(WORKER_URL, {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const res = await fetchWithBackoff(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages })
+      body: JSON.stringify(payload)
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    const text = (data.content || []).map(b => b.text || '').join('').trim();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    
+    // 成功した場合、無料体験回数を消費する
+    incrementTrialCount();
+    
     renderResult(text);
   } catch (err) {
     showToast('⚠ 生成に失敗しました。再度お試しください。');
     console.error(err);
   } finally {
-    document.getElementById('btn-generate').disabled = false;
+    const btn = document.getElementById('btn-generate');
+    btn.classList.remove('is-loading');
+    btn.innerHTML = '✨ 信頼の言葉を見つける';
+    
+    // プレミアム状態、または無料体験回数が残っている場合のみボタンを再有効化
+    if (isPremium || trialCount < MAX_FREE_TRIAL) {
+      btn.disabled = false;
+    }
     document.getElementById('loading').style.display = 'none';
   }
 }
@@ -1150,9 +1704,10 @@ function buildSection(label, body) {
   return `
     <div class="result-section">
       <div class="result-label">${label}</div>
-      <div class="result-body" id="rb_${Math.random().toString(36).slice(2)}">${escHtml(body)}</div>
+      <div class="result-body" id="rb_${Math.random().toString(36).slice(2)}" contenteditable="true" title="クリックして直接編集できます">${escHtml(body)}</div>
       <div class="result-actions">
         <button class="btn-copy" onclick="copySection(this)">📋 コピー</button>
+        <span style="font-size: 0.7rem; color: var(--text-soft); margin-left: auto; align-self: center;">※上の文章はクリックして直接修正できます</span>
       </div>
     </div>
   `;
@@ -1175,8 +1730,47 @@ function copySection(btn) {
     document.execCommand('copy');
     btn.textContent = '✅ コピーしました';
     btn.classList.add('copied');
+    showToast('✅ コピーしました'); // トースト通知を追加
     setTimeout(() => {
       btn.textContent = '📋 コピー';
+      btn.classList.remove('copied');
+    }, 2000);
+  } catch (err) {
+    console.error('Failed to copy text: ', err);
+    showToast('⚠ コピーに失敗しました');
+  } finally {
+    document.body.removeChild(tempTextArea);
+  }
+}
+
+function copyAllResults(btn) {
+  const content = document.getElementById('result-content');
+  let allText = "";
+  const sections = content.querySelectorAll('.result-section');
+  
+  if (sections.length > 0) {
+    sections.forEach(sec => {
+      const label = sec.querySelector('.result-label').innerText;
+      const body = sec.querySelector('.result-body').innerText;
+      allText += `【${label}】\n${body}\n\n`;
+    });
+  } else {
+    allText = content.innerText;
+  }
+  
+  const tempTextArea = document.createElement('textarea');
+  tempTextArea.value = allText.trim();
+  document.body.appendChild(tempTextArea);
+  tempTextArea.select();
+  
+  try {
+    document.execCommand('copy');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '✅ コピーしました';
+    btn.classList.add('copied');
+    showToast('✅ すべての投稿文をコピーしました');
+    setTimeout(() => {
+      btn.innerHTML = originalText;
       btn.classList.remove('copied');
     }, 2000);
   } catch (err) {
@@ -1194,6 +1788,23 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
+
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', () => {
+  // 無料体験の状態を初期化
+  initTrialState();
+  
+  // 保存された設定（SNS情報やテーマ）を読み込む
+  loadSettings();
+  
+  // 自動的に「現在の月」をカレンダーにセットする
+  const currentMonth = new Date().getMonth() + 1; // 1〜12を取得
+  const monthSelect = document.getElementById('month-select');
+  if (monthSelect) {
+    monthSelect.value = currentMonth.toString();
+    updateEventSelect(); // イベントの選択肢もその月に合わせて更新
+  }
+});
 </script>
 </body>
 </html>
